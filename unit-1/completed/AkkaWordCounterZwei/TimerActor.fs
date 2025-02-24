@@ -2,9 +2,14 @@ namespace AkkaWordCounterZwei
 
 open Akka.Actor
 open Akka.Hosting
+open Akka.FSharp
+open Akka.FSharp.Actors
+    
+        
+
 
 type TimerActor =
-    inherit ReceiveActor()
+    inherit ReceiveActor
     [<DefaultValue>] val mutable timer: ITimerScheduler
     val mutable helloActor: IActorRef
 
