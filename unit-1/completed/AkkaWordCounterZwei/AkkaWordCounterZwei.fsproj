@@ -6,12 +6,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Akka.FSharp" Version="1.5.38" />
         <PackageReference Include="Akka.Hosting" Version="1.5.38"/>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
         <Compile Include="HelloActor.fs"/>
+        <Compile Include="Message.fs" />
+        <Compile Include="Actors\DocumentWordCounter.fs" />
         <Compile Include="TimerActor.fs"/>
         <Compile Include="Program.fs"/>
     </ItemGroup>
