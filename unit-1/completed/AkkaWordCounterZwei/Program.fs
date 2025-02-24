@@ -2,23 +2,33 @@
 open Akka.Hosting
 open Microsoft.Extensions.Hosting
 open AkkaWordCounterZwei
+open Akka.FSharp
+open Akka.Configuration
 
-let hostbuilder = HostBuilder()
+let config = Configuration.load()
 
-hostbuilder.ConfigureServices(fun services ->
-    services.AddAkka("MyActorSystem", fun b ->
+let system = System.create "my-system" (Configuration.load())
 
-        b.WithActors(fun sys reg  -> 
-            let helloActor = sys.ActorOf(Props.Create<HelloActor>(fun () -> HelloActor()), "hello-actor")
-            reg.Register<HelloActor>(helloActor)) |> ignore
+let actor =
+    fun (mailbox: Actor<int>) ->
+        mailbox.Context.SetReceiveTimeout(System.TimeSpan.FromSeconds(1.0))
+        
+        let rec loop () =
+            actor {                
+                match! mailbox.Receive() with                
+                | _ ->
+                    return! loop ()
+            }
+        loop ()
 
-        b.WithActors(fun sys reg resolver -> 
-            let timerActorProps = resolver.Props<TimerActor>()
-            let timerActor = sys.ActorOf(timerActorProps, "timer-actor")
-            reg.Register<TimerActor>(timerActor)) |> ignore
-
-    ) |> ignore
-) |> ignore
-
-let host = hostbuilder.Build()
-host.RunAsync().Wait()
+[<EntryPoint>]
+let main argv =
+    task {
+        let actorRef = spawn system "my-actor" actor 
+        let promise = actorRef.Ask<unit>(1)
+        actorRef.Tell(2)
+        do! promise
+        return 0
+    }
+    |> _.GetAwaiter().GetResult()
+    

@@ -41,14 +41,17 @@ type DocumentCommands =
         member this.DocumentId = 
             match this with
             | ScanDocument uri -> Some uri
-            | ScanDocuments uris -> None
+            | ScanDocuments _ -> None
 
-type DocumentEvents =
+type DocumentMessages =
     | DocumentScanFailed of AbsoluteUri * string
     | WordsFound of AbsoluteUri * string list
     | EndOfDocumentReached of AbsoluteUri
     | CountsTabulatedForDocument of AbsoluteUri * Map<string, int>
     | CountsTabulatedForDocuments of AbsoluteUri list * Map<string, int>
+    | FetchCounts of AbsoluteUri
+    | SubscribeToAllCounts    
+            
     interface IWithDocumentId with
         member this.DocumentId = 
             match this with
@@ -56,15 +59,11 @@ type DocumentEvents =
             | WordsFound (uri, _) -> Some uri
             | EndOfDocumentReached uri -> Some uri
             | CountsTabulatedForDocument (uri, _) -> Some uri
-            | CountsTabulatedForDocuments (uris, _) -> None
-
-type DocumentQueries =
-    | FetchCounts of AbsoluteUri
-    | SubscribeToAllCounts
-    interface IWithDocumentId with
-        member this.DocumentId = 
-            match this with
             | FetchCounts uri -> Some uri
             | SubscribeToAllCounts -> None
+            | CountsTabulatedForDocuments (uris, _) -> None
+
+
+
 
 
