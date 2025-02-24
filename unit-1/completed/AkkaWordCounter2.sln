@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaWordCounter2.App.Tests"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounter", "AkkaWordCounter\AkkaWordCounter.fsproj", "{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounterZwei", "AkkaWordCounterZwei\AkkaWordCounterZwei.fsproj", "{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
