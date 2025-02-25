@@ -10,9 +10,7 @@ let config = Configuration.load()
 let system = System.create "my-system" (Configuration.load())
 
 let actor =
-    fun (mailbox: Actor<int>) ->
-        mailbox.Context.SetReceiveTimeout(System.TimeSpan.FromSeconds(1.0))
-        
+    fun (mailbox: Actor<int>) ->        
         let rec loop () =
             actor {                
                 match! mailbox.Receive() with                
@@ -24,7 +22,7 @@ let actor =
 [<EntryPoint>]
 let main argv =
     task {
-        let actorRef = spawn2 system "my-actor" actor 
+        let actorRef = spawn system "my-actor" actor 
         let promise = actorRef.Ask<unit>(1)
         actorRef.Tell(2)
         do! promise
