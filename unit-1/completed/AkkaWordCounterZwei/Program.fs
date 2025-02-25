@@ -1,10 +1,10 @@
 ﻿open Akka.Actor
 open Akka.Hosting
 open Microsoft.Extensions.Hosting
-open AkkaWordCounterZwei
 open Akka.FSharp
 open Akka.Configuration
-
+open AkkaWordCounterZwei
+open AkkaWordCounterZwei.Actors
 let config = Configuration.load()
 
 let system = System.create "my-system" (Configuration.load())
@@ -24,7 +24,7 @@ let actor =
 [<EntryPoint>]
 let main argv =
     task {
-        let actorRef = spawn system "my-actor" actor 
+        let actorRef = spawn2 system "my-actor" actor 
         let promise = actorRef.Ask<unit>(1)
         actorRef.Tell(2)
         do! promise
