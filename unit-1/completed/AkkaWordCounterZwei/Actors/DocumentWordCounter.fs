@@ -10,11 +10,13 @@ module DocumentWordCounter =
     type private WordCountStatus =
         | Receiving of Map<string, int> * Set<IActorRef>
         | Completed of Map<string, int>
-    let rec create (documentId: AbsoluteUri)=
+    let create (documentId: AbsoluteUri)=
         fun (mailbox:Actor<DocumentMessages>) ->
-            let logger = mailbox.Context.GetLogger()            
+            let logger = mailbox.Context.GetLogger()
             let rec loop =
                 function
+                // This is when we are finished processing the document. New messages are ignored.
+                // When someone asks how many words there are, they get an instant response.
                 | Completed wordCounts ->
                     actor {                        
                         match! mailbox.Receive() with
@@ -29,6 +31,9 @@ module DocumentWordCounter =
                             return! Completed wordCounts |> loop
                         | _ -> return! Completed wordCounts |> loop                    
                     }
+                // This is the active path!
+                // Actively receiving messages. Subscribers are added to list as they come in. Response will come when
+                // the document is read completely.
                 | Receiving (wordCounts, subscribers) ->
                    actor {                       
                        match! mailbox.Receive() with
@@ -59,7 +64,9 @@ module DocumentWordCounter =
                            return! Receiving (wordCounts, subscribers) |> loop
                        | msg ->
                            mailbox.Unhandled(msg)
-                           return! Receiving (wordCounts, subscribers) |> loop                       
+                           return! Receiving (wordCounts, subscribers) |> loop
+                   // So wait, is there really no way to handle ReceiveTimeout in the FSharp version?
+                   // Seems like an oversight!!
                    }
                    
             Receiving (Map.empty, Set.empty) |> loop 
