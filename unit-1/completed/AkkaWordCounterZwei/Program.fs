@@ -1,31 +1,65 @@
 ﻿open Akka.Actor
-open Akka.Hosting
-open Microsoft.Extensions.Hosting
 open Akka.FSharp
-open Akka.Configuration
-open AkkaWordCounterZwei
-open AkkaWordCounterZwei.Actors
-let config = Configuration.load()
+open Akka.Event
 
+let config = Configuration.load()
 let system = System.create "my-system" (Configuration.load())
 
-let actor =
-    fun (mailbox: Actor<int>) ->        
-        let rec loop () =
-            actor {                
-                match! mailbox.Receive() with                
-                | _ ->
-                    return! loop ()
-            }
-        loop ()
+type Heartbeat = 
+    | Pulse
+    | Start
+    | Stop
+
+let timer callback =
+    let t = new System.Timers.Timer(100.0, AutoReset = true)
+    t.Elapsed.Add(callback)
+    t.Start()
+    t
+
+let tryStop (t: System.Timers.Timer option) =
+    match t with
+    | Some t -> t.Stop()
+    | None -> ()
+
+let heartbeatRecipient =
+    fun (mailbox: Actor<Heartbeat>) ->
+        let rec loop =
+            function
+            | Some (tee: System.Timers.Timer) ->
+                actor {
+                    match! mailbox.Receive() with
+                    | Pulse ->
+                        mailbox.Log.Value.Info("BA-DUM")
+                        return! loop (Some tee)
+                    | Start ->
+                        return! loop (Some tee)
+                    | Stop ->
+                        mailbox.Log.Value.Info("Stopping...")
+                        tee.Stop()
+                        return! loop None            
+                }
+            | None ->
+                actor {
+                    match! mailbox.Receive() with                    
+                    | Start ->
+                        mailbox.Log.Value.Info("Starting...")
+                        let t = timer (fun _ -> mailbox.Self.Tell(Pulse))
+                        return! loop (Some t)
+                    | _ ->
+                        return! loop None
+                }
+        loop None
+
+
 
 [<EntryPoint>]
-let main argv =
+let main _ =
     task {
-        let actorRef = spawn system "my-actor" actor 
-        let promise = actorRef.Ask<unit>(1)
-        actorRef.Tell(2)
-        do! promise
+        let actorRef = spawn system "my-actor" heartbeatRecipient 
+        actorRef.Tell(Start)        
+        do! System.Threading.Tasks.Task.Delay(5000)
+        actorRef.Tell(Stop)
+        do! System.Threading.Tasks.Task.Delay(1000)
         return 0
     }
     |> _.GetAwaiter().GetResult()

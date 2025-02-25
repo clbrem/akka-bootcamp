@@ -1,9 +1,7 @@
 namespace AkkaWordCounterZwei.Actors
 open System.Web
 open Akka.Actor
-open Akka.Event
 open AkkaWordCounterZwei
-open Akka
 open Akka.FSharp
 
 
