@@ -17,7 +17,10 @@ module AbsoluteUri =
         if uri.IsAbsoluteUri |> not
         then ArgumentException "Value must be an absolute URL." |> raise
         AbsoluteUri uri
-        
+    let ofString (uri: string) =
+        match Uri.TryCreate(uri, UriKind.Absolute) with
+        | true, uri -> AbsoluteUri uri
+        | _ -> ArgumentException "Value must be a valid absolute URL." |> raise
     let value (absoluteUri: AbsoluteUri) =
         match absoluteUri with
         | AbsoluteUri uri -> uri
