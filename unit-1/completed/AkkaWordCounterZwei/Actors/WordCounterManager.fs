@@ -11,8 +11,7 @@ type WordCounterManager = FunActor<IWithDocumentId, obj>
 module WordCounterManager =
     let create =
         fun (mailbox: Actor<IWithDocumentId>) ->
-            let rec loop () =
-                
+            let rec loop () =                
                 actor {
                     match! mailbox.Receive() with
                     | msg when DocumentId.exists msg ->
@@ -21,7 +20,7 @@ module WordCounterManager =
                         let childName = $"word-counter-%s{HttpUtility.UrlEncode(docId.ToString())}"
                         let child = mailbox.Context.Child(childName)
                         if child.IsNobody() then
-                            let newChild = spawn mailbox.Context.System childName (DocumentWordCounter.create docId)
+                            let newChild = spawn mailbox.Context.System childName (DocumentWordCounter.create docId )                            
                             newChild.Forward msg                            
                         else
                             child.Forward msg 

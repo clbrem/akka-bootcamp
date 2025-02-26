@@ -20,7 +20,14 @@
         <Compile Include="Actors\WordCounterManager.fs" />
         <Compile Include="Actors\Parser.fs" />
         <Compile Include="Config\ActorConfiguration.fs" />
+        <Compile Include="Config\WordCounterSettings.fs" />
         <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

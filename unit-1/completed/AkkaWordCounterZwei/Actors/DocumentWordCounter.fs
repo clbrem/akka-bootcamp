@@ -10,6 +10,7 @@ module DocumentWordCounter =
         | Completed of Map<string, int>
     let create (documentId: AbsoluteUri)=
         fun (mailbox:Actor<DocumentMessages>) ->
+            mailbox.Context.SetReceiveTimeout(System.TimeSpan.FromSeconds 3.0)
             let logger = mailbox.Context.GetLogger()
             let rec loop =
                 function

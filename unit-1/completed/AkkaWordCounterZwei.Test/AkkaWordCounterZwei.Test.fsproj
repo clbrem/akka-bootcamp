@@ -9,10 +9,12 @@
     <ItemGroup>
         <Compile Include="Tests.fs"/>
         <Compile Include="DocumentWordCounter.Spec.fs" />
+        <Compile Include="ParserActorSpec.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Akka.Hosting.TestKit" Version="1.5.38" />
         <PackageReference Include="Akka.TestKit.Xunit2" Version="1.5.38" />
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
