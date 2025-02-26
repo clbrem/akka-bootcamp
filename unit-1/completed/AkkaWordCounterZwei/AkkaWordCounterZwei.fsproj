@@ -14,14 +14,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="HelloActor.fs"/>
         <Compile Include="Message.fs" />
         <Compile Include="TextExtractor.fs" />
         <Compile Include="Actors\DocumentWordCounter.fs" />
         <Compile Include="Actors\WordCounterManager.fs" />
         <Compile Include="Actors\Parser.fs" />
-        <Compile Include="TimerActor.fs"/>
-        <Compile Include="Program.fs"/>
+        <Compile Include="Config\ActorConfiguration.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
 </Project>
