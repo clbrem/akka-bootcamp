@@ -9,6 +9,7 @@ module WordCounterManager =
     let create =
         fun (mailbox: Actor<IWithDocumentId>) ->
             let rec loop () =
+                
                 actor {
                     match! mailbox.Receive() with
                     | msg when DocumentId.exists msg ->
