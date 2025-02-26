@@ -4,6 +4,9 @@ open Akka.Actor
 open AkkaWordCounterZwei
 open Akka.FSharp
 
+type WordCounterManager = FunActor<IWithDocumentId, obj>
+    
+        
 
 module WordCounterManager =
     let create =

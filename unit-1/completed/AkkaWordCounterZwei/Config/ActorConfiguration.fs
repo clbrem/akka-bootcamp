@@ -6,14 +6,13 @@ open Akka.Routing
 open Akka.FSharp
 open AkkaWordCounterZwei.Actors
 
-type WordCounterManagerActor = private | WordCounterManagerActor
-type ParserActor = private | ParserActor
+
 module ActorConfiguration =
     let addWordCounterActor (builder: AkkaConfigurationBuilder) =
         builder.WithActors(
             fun system registry _ ->
-                let actor = spawn system "word-counter-manager" WordCounterManager.create
-                registry.Register<WordCounterManagerActor>(actor)                
+                let actor = spawn system "word-counter-manager" WordCounterManager.create  
+                registry.Register<WordCounterManager>(actor)                
             )
     
     let addParserActor (builder: AkkaConfigurationBuilder) =
@@ -24,5 +23,5 @@ module ActorConfiguration =
                     Parser.create factory                    
                     |> spawnOpt system "parsers"
                     <| [SpawnOption.Router (RoundRobinPool(5))]
-                registry.Register<ParserActor>(actor) 
+                registry.Register<Parser>(actor) 
                 )
