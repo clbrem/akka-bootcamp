@@ -9,8 +9,7 @@ open Microsoft.Extensions.Hosting
 open Xunit.Abstractions
 
 type ParserActorSpec(output: ITestOutputHelper) as this=
-    inherit Akka.Hosting.TestKit.TestKit(output = output)
-    
+    inherit Akka.Hosting.TestKit.TestKit(output = output)    
     let parserActorUri = AbsoluteUri.ofString "https://getakka.net/"
     [<Fact>]
     let ``Should Parse Words``() =
@@ -19,10 +18,11 @@ type ParserActorSpec(output: ITestOutputHelper) as this=
             let expectResultsProbe = this.CreateTestProbe()
             parserActor.Tell (ScanDocument parserActorUri, expectResultsProbe)            
             let! _ =
-                expectResultsProbe.FishForMessageAsync(
-                    (function
-                    | EndOfDocumentReached _ -> true
-                    | _ -> false)
+                expectResultsProbe.FishForMessageAsync
+                    (
+                      function
+                      | EndOfDocumentReached _ -> true
+                      | _ -> false
                     )            
             return ()
         }
@@ -32,7 +32,8 @@ type ParserActorSpec(output: ITestOutputHelper) as this=
 
     override this.ConfigureAkka(builder, provider) =
         builder.ConfigureLoggers(
-            fun configBuilder -> configBuilder.LogLevel <- Akka.Event.LogLevel.DebugLevel 
+            fun configBuilder ->
+                configBuilder.LogLevel <- Akka.Event.LogLevel.DebugLevel                            
             )
         |> addParserActor
         |> ignore

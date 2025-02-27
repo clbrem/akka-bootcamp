@@ -9,6 +9,6 @@ type WordCounterSettings  = {
 //type WordCounterSettingsValidator (options: WordCounterSettings)=
     
 
-module WordCounterSettings =
+//module WordCounterSettings =
     
 
