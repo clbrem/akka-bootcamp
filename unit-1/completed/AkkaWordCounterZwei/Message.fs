@@ -6,20 +6,31 @@ open System
 /// Value type for enforcing absolute URIs 
 /// </summary>
 
+    
+
 [<Struct>]
-type AbsoluteUri = private AbsoluteUri of Uri 
+[<CustomEquality>]
+[<CustomComparison>]
+type AbsoluteUri = private AbsoluteUri of Uri    
     with override this.ToString() =
-            match this with AbsoluteUri uri -> uri.ToString()
+            match this with AbsoluteUri uri -> uri.ToString()         
+         override this.Equals(obj: obj) =
+             this.ToString() = obj.ToString()
+         override this.GetHashCode() =
+                 this.ToString().GetHashCode()
+         interface IComparable with
+           member this.CompareTo(obj) = String.Compare(obj.ToString(), this.ToString())
+    
     
 module AbsoluteUri =
     
     let create (uri: Uri) =
         if uri.IsAbsoluteUri |> not
         then ArgumentException "Value must be an absolute URL." |> raise
-        AbsoluteUri uri
+        uri |> AbsoluteUri
     let ofString (uri: string) =
         match Uri.TryCreate(uri, UriKind.Absolute) with
-        | true, uri -> AbsoluteUri uri
+        | true, uri -> uri |> AbsoluteUri
         | _ -> ArgumentException "Value must be a valid absolute URL." |> raise
     let value (absoluteUri: AbsoluteUri) =
         match absoluteUri with

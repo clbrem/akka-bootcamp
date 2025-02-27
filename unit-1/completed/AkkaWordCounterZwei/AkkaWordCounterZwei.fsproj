@@ -16,9 +16,11 @@
     <ItemGroup>
         <Compile Include="Message.fs" />
         <Compile Include="TextExtractor.fs" />
+        <Compile Include="CollectionUtilities.fs" />
         <Compile Include="Actors\DocumentWordCounter.fs" />
         <Compile Include="Actors\WordCounterManager.fs" />
         <Compile Include="Actors\Parser.fs" />
+        <Compile Include="Actors\WordCountJobActor.fs" />
         <Compile Include="Config\ActorConfiguration.fs" />
         <Compile Include="Config\WordCounterSettings.fs" />
         <Compile Include="Program.fs" />

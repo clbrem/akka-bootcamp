@@ -7,7 +7,8 @@ using static DocumentCommands;
 using static CounterCommands; // make message handlers less verbose
 
 public sealed class ParserActor : UntypedActor {
-    private readonly ILoggingAdapter _log = Context.GetLogger();
+    private readonly ILoggingAdapter _log = Context.
+        GetLogger();
     private readonly IActorRef _countingActor;
 
     public ParserActor(IActorRef countingActor)

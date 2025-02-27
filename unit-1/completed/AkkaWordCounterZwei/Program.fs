@@ -1,10 +1,8 @@
-﻿open Akka.Actor
-open Akka.Configuration
-open Akka.FSharp
-open Akka.Event
-open Akka.Hosting
+﻿open Akka.Hosting
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
+
 open AkkaWordCounterZwei.Config
 
 [<EntryPoint>]
@@ -13,10 +11,20 @@ let main _ =
         task {
           let hostBuilder =
               HostBuilder()
+                  .ConfigureAppConfiguration(
+                      fun context builder ->
+                          builder
+                              .AddJsonFile("appsettings.json", true)
+                              .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true)
+                              .AddEnvironmentVariables()
+                          |> ignore
+                          )
                   .ConfigureServices(
                       fun context services ->
-                          services.AddHttpClient() |> ignore
-                          services.AddAkka(
+                          services
+                          |> _.AddHttpClient() 
+                          |> WordCounterSettings.AddWordCounterSettings 
+                          |> _.AddAkka(
                               "MyActorSystem",
                               fun akkaBuilder sp ->
                                   akkaBuilder.ConfigureLoggers(
