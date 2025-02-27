@@ -47,7 +47,8 @@ module Parser =
                         ActorTaskScheduler.RunTask(
                             fun () ->
                                 task {
-                                    let sender = mailbox.Sender()
+                                    do logger.Debug("Processing Document {0}", document)
+                                    let sender = mailbox.Sender()                                    
                                     try                                        
                                         let! features = handleDocument(document, httpClientFactory, shutdownCts)
                                         do features |> Seq.iter (fun f -> sender.Tell(WordsFound(document, f)))
