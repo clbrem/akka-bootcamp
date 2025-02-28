@@ -21,14 +21,9 @@ type WordCounterSettingsValidator() =
             match errors with
             | [] -> ValidateOptionsResult.Success
             | _ -> ValidateOptionsResult.Fail(errors)
-                
-        
-    
+
     module WordCounterSettings =
         let AddWordCounterSettings(services: IServiceCollection) =
             services.AddSingleton<IValidateOptions<WordCounterSettings>, WordCounterSettingsValidator>() |> ignore
             services.AddOptionsWithValidateOnStart<WordCounterSettings>().BindConfiguration("WordCounter") |> ignore
             services
-            
-        
-    
