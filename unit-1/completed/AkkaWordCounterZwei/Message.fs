@@ -48,15 +48,6 @@ module DocumentId =
         (doc:>IWithDocumentId).DocumentId
         |> Option.isSome
 
-type DocumentCommands =
-    | ScanDocument of AbsoluteUri
-    | ScanDocuments of AbsoluteUri list
-    interface IWithDocumentId with
-        member this.DocumentId = 
-            match this with
-            | ScanDocument uri -> Some uri
-            | ScanDocuments _ -> None
-
 type DocumentMessages =
     | DocumentScanFailed of AbsoluteUri * string
     | WordsFound of AbsoluteUri * string list
@@ -64,6 +55,8 @@ type DocumentMessages =
     | CountsTabulatedForDocument of AbsoluteUri * Map<string, int>
     | CountsTabulatedForDocuments of AbsoluteUri list * Map<string, int>
     | FetchCounts of AbsoluteUri
+    | ScanDocument of AbsoluteUri
+    | ScanDocuments of AbsoluteUri list
     | SubscribeToAllCounts    
             
     interface IWithDocumentId with
@@ -76,6 +69,8 @@ type DocumentMessages =
             | FetchCounts uri -> Some uri
             | SubscribeToAllCounts -> None
             | CountsTabulatedForDocuments (uris, _) -> None
+            | ScanDocument uri -> Some uri
+            | ScanDocuments _ -> None
 
 
 

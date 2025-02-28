@@ -37,7 +37,7 @@ module Parser =
             )
             
     let create (httpClientFactory: IHttpClientFactory) =
-        fun (mailbox: Actor<DocumentCommands>) ->
+        fun (mailbox: Actor<DocumentMessages>) ->
             let shutdownCts = new CancellationTokenSource()
             let logger = mailbox.Context.GetLogger()
             let rec loop () =                
