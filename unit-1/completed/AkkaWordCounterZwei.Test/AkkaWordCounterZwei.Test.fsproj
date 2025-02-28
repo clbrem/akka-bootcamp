@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="Tests.fs"/>
         <Compile Include="DocumentWordCounter.Spec.fs" />
+        <Compile Include="Timeout.Spec.fs" />
         <Compile Include="ParserActorSpec.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>

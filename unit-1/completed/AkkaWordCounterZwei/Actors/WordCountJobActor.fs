@@ -91,6 +91,10 @@ module WordCountJobActor =
                                     false,
                                     WordCountState.failDocument state doc
                                 )|> loop
+                        | JobTimeout
+                        | _ -> failwith "todo"
                     }
+                | JobComplete (force, wordState) ->
+                    
             loop Receiving
 
