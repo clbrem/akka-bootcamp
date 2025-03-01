@@ -6,69 +6,78 @@ open Akka.FSharp
 open Akka.Actor
 
 
-type private TimerMessage<'T> =
-    | Start 
-    | Stop
-    | Handler of TimerContent<'T>
 
-module Timeout =
-    let private timer (onComplete: 'T,shouldRepeat, timeout: TimeSpan) (mailbox: 'T -> unit) =        
-        let t = new Timer(timeout)        
-        t.AutoReset <- shouldRepeat
+type  TimerContent=   
+    {
+     onComplete: obj
+     shouldRepeat: bool
+     timeout: TimeSpan
+    } with
+    static member Create(onComplete: obj, timeout: TimeSpan, shouldRepeat: bool) =
+        { onComplete = onComplete
+          shouldRepeat = shouldRepeat 
+          timeout = timeout 
+        }
+
+type TimerMessage<'T> =
+    | StartTimer 
+    | StopTimer
+    | Handler of TimerContent
+
+module  Timeout =    
+    let DEFAULT_TIMEOUT = TimeSpan.FromSeconds 3.0
+    let timer (callback: obj -> unit)(content: TimerContent)  =        
+        let t = new Timer(content.timeout)        
+        t.AutoReset <- content.shouldRepeat
         t.Elapsed.AddHandler(
             fun _ _ -> 
-                mailbox onComplete
+                callback content.onComplete
             )
         t
-    let private kill (t: Timer option) =
+    let  kill (t: Timer option) =
         match t with
         | Some timer -> timer.Stop(); timer.Dispose()
         | None -> ()
-    let start<'T>  (sender: IActorRef, onComplete: 'T,shouldRepeat, timeout: TimeSpan) =
+    let start(callback: IActorRef ) (content: TimerContent)=
         fun (mailbox: Actor<TimerMessage<'T>>) ->
-            let rec loop (maybeTimer: Timer option) =
+            let rec loop (maybeTimer: Timer option) (content: TimerContent) =
                 actor {
                     match! mailbox.Receive() with                    
-                    | Start ->                        
+                    | StartTimer ->                        
                         kill maybeTimer
                         let newTimer =
-                            timer (onComplete, shouldRepeat, timeout) 
-                                
+                            timer callback.Tell content
                         do newTimer.Start()
-                        return!                        
-                            loop (Some newTimer)                            
-                    | Stop -> 
+                        return! loop (Some newTimer) content
+                    | StopTimer -> 
                         kill maybeTimer
-                        return! loop None
-                    | Handler ->
-                        
-                        kill maybeTimer
-                        
+                        return! loop None content
+                    | Handler content -> 
+                        return! loop maybeTimer content                          
                 }
-            loop None
+            loop None content
         
-[<Extension>]
 type TimeoutExtension =
     [<Extension>]
     static member TryChild(this: IActorContext, name: string) =
         let child = this.Child(name)
         if child.IsNobody() then None else Some child
     [<Extension>]
-    static member OnTimeout(this: IActorContext, timeout: System.TimeSpan, onComplete: 'T, ?name: string) =
+    static member OnTimeout(this: IActorContext, onComplete: obj, ?name: string, ?timeout: TimeSpan) =
         let name = name |> Option.defaultValue "timeout"
+        let actualTimeout = timeout |> Option.defaultValue Timeout.DEFAULT_TIMEOUT
+        let content =  TimerContent.Create(onComplete, actualTimeout, false)        
         match this.TryChild(name) with
-        | Some actor -> actor.Tell(Timeout.Start)
+        | Some actor ->
+            actor.Tell (Handler content)
+            actor.Tell StartTimer
         | None ->
             let newChild =
                 spawn
-                    this.System
+                    this
                     name
-                    (Timeout.start
-                         false
-                         timeout
-                         onComplete
-                    )
-            newChild.Tell(Start )        
+                    (Timeout.start this.Self content)
+            newChild.Tell StartTimer
         
     
     
