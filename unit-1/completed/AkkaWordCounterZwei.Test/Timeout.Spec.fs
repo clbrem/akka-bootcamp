@@ -15,7 +15,7 @@ type private Testing =
 
 type Timeout_Spec(helper: ITestOutputHelper) as this =
     inherit TestKit(config="akka.loglevel=DEBUG",output=helper)    
-    let timer = "timer"
+    let timerName = "timer"
     let timeout = System.TimeSpan.FromSeconds(5.0)
     let actorok = 
         fun (mailbox: Actor<Testing>) ->            
@@ -23,7 +23,7 @@ type Timeout_Spec(helper: ITestOutputHelper) as this =
                 actor {
                     match! mailbox.Receive() with
                     | Ping ->
-                        mailbox.Context.OnTimeout(timeout, Pong, timer)
+                        mailbox.Context.OnTimeout(timeout, Pong, timerName)                        
                         return! loop (mailbox.Sender()|> Some)
                     | Pong ->
                         match sender with
