@@ -11,7 +11,7 @@ open Akka.Actor
 open Akka.FSharp
 
 
-type Parser = FunActor<DocumentCommands, obj>
+type Parser = FunActor<DocumentMessages, obj>
 
 module Parser =
     
