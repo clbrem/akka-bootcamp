@@ -1,57 +1,39 @@
 namespace AkkaWordCounterZwei.Actors
 open System
 open System.Runtime.CompilerServices
-open Akka.Actor
 open System.Timers
 open Akka.FSharp
+open Akka.Actor
 
-
-type private TimerContent<'T>(onComplete: 'T, ?timeout: TimeSpan, ?shouldRepeat: bool ) =
-    member _.Timer(mailbox: 'T -> unit) =
-        let actualTimeout = timeout |> Option.defaultValue (TimeSpan.FromSeconds 3.0)
-        let actualRepeat = shouldRepeat |> Option.defaultValue false
-        let t = new Timer(actualTimeout)        
-        t.AutoReset <- actualRepeat
-        t.Elapsed.AddHandler(
-            fun _ _ -> 
-                mailbox onComplete
-            )
-        t    
 
 type private TimerMessage<'T> =
     | Start 
     | Stop
     | Handler of TimerContent<'T>
 
-module Timeout<'T> =
-    let private timer (shouldRepeat, timeout: System.TimeSpan, onComplete)=
+module Timeout =
+    let private timer (onComplete: 'T,shouldRepeat, timeout: TimeSpan) (mailbox: 'T -> unit) =        
         let t = new Timer(timeout)        
         t.AutoReset <- shouldRepeat
         t.Elapsed.AddHandler(
             fun _ _ -> 
-                onComplete()
+                mailbox onComplete
             )
-        t    
+        t
     let private kill (t: Timer option) =
         match t with
         | Some timer -> timer.Stop(); timer.Dispose()
         | None -> ()
-        
-    let start shouldRepeat timeout onComplete =
-        fun (mailbox: Actor<TimerMessage>) ->
+    let start<'T>  (sender: IActorRef, onComplete: 'T,shouldRepeat, timeout: TimeSpan) =
+        fun (mailbox: Actor<TimerMessage<'T>>) ->
             let rec loop (maybeTimer: Timer option) =
                 actor {
                     match! mailbox.Receive() with                    
-                    | Start ->
-                        let sender = mailbox.Sender()                        
+                    | Start ->                        
                         kill maybeTimer
                         let newTimer =
-                            timer (shouldRepeat, timeout, 
-                                fun () ->
-                                    if not shouldRepeat then 
-                                      mailbox.Self.Tell(Stop)
-                                    sender.Tell onComplete
-                                )
+                            timer (onComplete, shouldRepeat, timeout) 
+                                
                         do newTimer.Start()
                         return!                        
                             loop (Some newTimer)                            
