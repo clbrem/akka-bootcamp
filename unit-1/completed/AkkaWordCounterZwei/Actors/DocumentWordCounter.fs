@@ -10,7 +10,7 @@ module DocumentWordCounter =
         | Completed of Map<string, int>
     let create (documentId: AbsoluteUri)=
         fun (mailbox:Actor<DocumentMessages>) ->
-            mailbox.Context.SetReceiveTimeout(System.TimeSpan.FromSeconds 3.0)
+            mailbox.Context.OnTimeout(Timeout, timeout=System.TimeSpan.FromMinutes(2.0))
             let logger = mailbox.Context.GetLogger()
             let rec loop =
                 function
@@ -19,6 +19,9 @@ module DocumentWordCounter =
                 | Completed wordCounts ->
                     actor {                        
                         match! mailbox.Receive() with
+                        | Timeout ->
+                            mailbox.Context.Stop(mailbox.Self)
+                            return ()
                         | FetchCounts _ ->
                             mailbox.Sender().Tell(CountsTabulatedForDocument (documentId, wordCounts))
                             return! loop (Completed wordCounts)
@@ -28,6 +31,7 @@ module DocumentWordCounter =
                         | msg when DocumentId.exists msg->
                             do logger.Warning("Received message for document {0} but I am responsible for document {1}",DocumentId.get msg, documentId)
                             return! Completed wordCounts |> loop
+                        
                         | _ -> return! Completed wordCounts |> loop                    
                     }
                 // This is the active path!
@@ -36,6 +40,10 @@ module DocumentWordCounter =
                 | Receiving (wordCounts, subscribers) ->
                    actor {                       
                        match! mailbox.Receive() with
+                       | Timeout ->
+                            logger.Warning("Document {0} timed out", documentId)
+                            mailbox.Context.Stop(mailbox.Self)
+                            return ()
                        | WordsFound (doc, words) when doc = documentId ->
                            do logger.Debug("Found {0} words in document {1}", List.length words, documentId)
                            return!
@@ -49,7 +57,7 @@ module DocumentWordCounter =
                                )
                                |> Receiving
                                |> loop
-                       | FetchCounts (doc) when doc = documentId  ->
+                       | FetchCounts doc when doc = documentId  ->
                            let subs = mailbox.Sender() |> Set.add <| subscribers 
                            return! (wordCounts, subs)
                                    |> Receiving

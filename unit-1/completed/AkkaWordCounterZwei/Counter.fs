@@ -10,4 +10,6 @@ module Counter =
                     (Map.tryFind k acc |> Option.defaultValue 0) + v) acc)
     let mergeMany<'T when 'T : comparison>: Counter<'T> seq -> Counter<'T> =
         Seq.fold merge Map.empty
+    let totals<'T when 'T: comparison> (counter: Counter<'T>) =
+        Map.fold (fun acc _ v -> acc + v) 0 counter
 

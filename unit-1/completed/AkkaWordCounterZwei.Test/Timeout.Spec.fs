@@ -14,7 +14,7 @@ type private Testing =
 type Timeout_Spec(helper: ITestOutputHelper) as this =
     inherit TestKit(config="akka.loglevel=INFO",output=helper)    
     let timerName = "timer"
-    let timeout = System.TimeSpan.FromSeconds(2.0)
+    let timeout = System.TimeSpan.FromSeconds(0.5)
     let actorA = 
         fun (mailbox: Actor<Testing>) ->            
             let rec loop sender =
@@ -86,7 +86,7 @@ type Timeout_Spec(helper: ITestOutputHelper) as this =
     [<Fact>]
     let ``Testing Timeout 2``() =
         task {
-            let actor = spawn this.Sys "test" actorA
+            let actor = spawn this.Sys "test" actorB
             let! resp = actor.Ask<string>(Ping)
             Assert.Equal("Done!", resp)
         }
