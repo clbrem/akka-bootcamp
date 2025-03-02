@@ -57,7 +57,8 @@ type DocumentMessages =
     | FetchCounts of AbsoluteUri
     | ScanDocument of AbsoluteUri
     | ScanDocuments of AbsoluteUri list
-    | SubscribeToAllCounts    
+    | SubscribeToAllCounts
+    | Timeout
             
     interface IWithDocumentId with
         member this.DocumentId = 
@@ -71,6 +72,7 @@ type DocumentMessages =
             | CountsTabulatedForDocuments (uris, _) -> None
             | ScanDocument uri -> Some uri
             | ScanDocuments _ -> None
+            | Timeout _ -> None
 
 
 

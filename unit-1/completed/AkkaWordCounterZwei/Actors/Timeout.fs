@@ -6,8 +6,7 @@ open Akka.FSharp
 open Akka.Actor
 
 
-
-type  TimerContent=   
+type private TimerContent =   
     {
      onComplete: obj
      shouldRepeat: bool
@@ -19,12 +18,12 @@ type  TimerContent=
           timeout = timeout 
         }
 
-type TimerMessage<'T> =
+type private TimerMessage =
     | StartTimer 
     | StopTimer
     | Handler of TimerContent
 
-module  Timeout =    
+module  private Timeout =    
     let DEFAULT_TIMEOUT = TimeSpan.FromSeconds 3.0
     let timer (callback: obj -> unit)(content: TimerContent)  =        
         let t = new Timer(content.timeout)        
@@ -39,7 +38,7 @@ module  Timeout =
         | Some timer -> timer.Stop(); timer.Dispose()
         | None -> ()
     let start(callback: IActorRef ) (content: TimerContent)=
-        fun (mailbox: Actor<TimerMessage<'T>>) ->
+        fun (mailbox: Actor<TimerMessage>) ->
             let rec loop (maybeTimer: Timer option) (content: TimerContent) =
                 actor {
                     match! mailbox.Receive() with                    

@@ -14,8 +14,14 @@ type ProcessingStatus =
 type WordCountState =
    {
        wordCount: Map<AbsoluteUri, Counter<string>>
-       documentsToProcess: Map<AbsoluteUri,ProcessingStatus> 
-   }    with static member empty = { documentsToProcess = Map.empty; wordCount = Map.empty }
+       documentsToProcess: Map<AbsoluteUri,ProcessingStatus>
+       subscribers: Set<IActorRef>
+   }    with static member empty =
+               {
+                   documentsToProcess = Map.empty
+                   wordCount = Map.empty
+                   subscribers = Set.empty
+               }
 module WordCountState =
     let wordCount (state: WordCountState) (doc: AbsoluteUri) (wordCount:Map<string, int>) =
         
@@ -30,6 +36,17 @@ module WordCountState =
         setStatus ProcessingStatus.FailedError
     let timeoutDocument = 
         setStatus ProcessingStatus.FailedTimeout
+    let isCompleted =
+        _.documentsToProcess
+        >> Map.exists (fun _ status -> status = ProcessingStatus.Processing)
+        >> not
+    let enumerateStatus state = 
+        state.documentsToProcess
+        |> Map.toList
+        |> List.map (fun (uri, status) -> (uri, status, Map.find uri state.wordCount |> Counter.totals )) 
+    let broadcast (state: WordCountState) (msg: DocumentMessages) =
+        state.subscribers
+        |> Set.iter (fun sub -> sub.Tell msg)
 
 type WordCountJobActorStatus =
     | Receiving
@@ -43,7 +60,7 @@ type WordCountJobActorStatus =
 
 module WordCountJobActor =
     let create (registry: IActorRegistry)=
-        fun (mailbox: Actor<DocumentMessages>) ->
+        fun (mailbox: Actor<DocumentMessages>) -> 
             let wordCounter = registry.Get<IRequiredActor<WordCounterManager>>()
             let parser = registry.Get<IRequiredActor<Parser>>()
             let logger = mailbox.Context.GetLogger()            
@@ -94,7 +111,22 @@ module WordCountJobActor =
                         | _ -> failwith "todo"
                     }
                 | JobComplete (force, wordState) ->
-                    actor {}
-                    
+                    if force || (WordCountState.isCompleted wordState) then 
+                        actor {
+                             do WordCountState.enumerateStatus wordState
+                                |> List.iter (
+                                    fun (doc, status, count) ->
+                                        logger.Info("Document {0} status: {1}, total words: {2}", doc, status, count)
+                                    )
+                             let mergedCounts = wordState.wordCount |> Map.values |> Counter.mergeMany
+                             do CountsTabulatedForDocuments(Map.keys wordState.documentsToProcess |> List.ofSeq, mergedCounts)
+                                |> WordCountState.broadcast wordState
+                             do mailbox.Context.Stop(mailbox.Self)
+                             return ()
+                        }
+                    else
+                        actor {
+                            return! loop (Running wordState)
+                        }
             loop Receiving
 
