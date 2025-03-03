@@ -1,5 +1,7 @@
 namespace AkkaWordCounterZwei.Config
 open System.Net.Http
+open System.Runtime.CompilerServices
+open System.Threading.Tasks
 open Akka.Actor
 open Akka.Hosting
 open Akka.Routing
@@ -25,3 +27,22 @@ module ActorConfiguration =
                     <| [SpawnOption.Router (RoundRobinPool(5))]
                 registry.Register<Parser>(actor) 
                 )
+    let addJobActor (builder: AkkaConfigurationBuilder) =
+        builder.WithActors(
+            fun system registry _ ->
+                let actor = spawn system "job" (WordCountJobActor.create registry) 
+                registry.Register<WordCount>(actor) 
+            )
+    let addApplicationActors (builder: AkkaConfigurationBuilder) =
+        builder
+        |> addWordCounterActor
+        |> addParserActor
+        |> addJobActor
+    let addStartup ( startupAction : ActorSystem -> IActorRegistry -> Task )(builder: AkkaConfigurationBuilder) =        
+        builder.AddStartup(StartupTask startupAction)
+        
+[<Extension>]
+type ActorConfigurationExtensions =
+    [<Extension>]
+    static member AddApplicationActors(builder: AkkaConfigurationBuilder) =
+        ActorConfiguration.addApplicationActors builder
