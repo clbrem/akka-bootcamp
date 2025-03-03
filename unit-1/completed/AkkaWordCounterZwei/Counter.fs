@@ -12,4 +12,6 @@ module Counter =
         Seq.fold merge Map.empty
     let totals<'T when 'T: comparison> (counter: Counter<'T>) =
         Map.fold (fun acc _ v -> acc + v) 0 counter
+    let enumerate<'T when 'T: comparison> (counter: Counter<'T>) =
+        Map.fold (fun acc k v -> (k, v) :: acc) [] counter
 

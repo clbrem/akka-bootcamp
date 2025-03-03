@@ -11,7 +11,7 @@ type ProcessingStatus =
     | FailedError= 2
     | FailedTimeout = 3
 
-type WordCountState =
+type WordCount =
    {
        wordCount: Map<AbsoluteUri, Counter<string>>
        documentsToProcess: Map<AbsoluteUri,ProcessingStatus>
@@ -22,11 +22,11 @@ type WordCountState =
                    wordCount = Map.empty
                    subscribers = Set.empty
                }
-module WordCountState =
-    let wordCount (state: WordCountState) (doc: AbsoluteUri) (wordCount:Map<string, int>) =
+module WordCount =
+    let wordCount (state: WordCount) (doc: AbsoluteUri) (wordCount:Map<string, int>) =
         
         { state with wordCount = Map.add doc wordCount state.wordCount }
-    let setStatus status (state: WordCountState) (doc: AbsoluteUri) =
+    let setStatus status (state: WordCount) (doc: AbsoluteUri) =
         { state with documentsToProcess = Map.add doc status state.documentsToProcess }
     let processDocument =
         setStatus ProcessingStatus.Processing
@@ -43,15 +43,15 @@ module WordCountState =
     let enumerateStatus state = 
         state.documentsToProcess
         |> Map.toList
-        |> List.map (fun (uri, status) -> (uri, status, Map.find uri state.wordCount |> Counter.totals )) 
-    let broadcast (state: WordCountState) (msg: DocumentMessages) =
+        |> List.map (fun (uri, status) -> (uri, status, Map.tryFind uri state.wordCount |> Option.map Counter.totals  |> Option.defaultValue 0)) 
+    let broadcast (state: WordCount) (msg: DocumentMessages) =
         state.subscribers
         |> Set.iter (fun sub -> sub.Tell msg)
 
 type WordCountJobActorStatus =
     | Receiving
-    | Running of WordCountState
-    | JobComplete of bool*WordCountState
+    | Running of WordCount
+    | JobComplete of bool*WordCount
 
 /// <summary>
 /// Responsible for processing a batch of documents
@@ -60,9 +60,10 @@ type WordCountJobActorStatus =
 
 module WordCountJobActor =
     let create (registry: IActorRegistry)=
-        fun (mailbox: Actor<DocumentMessages>) -> 
-            let wordCounter = registry.Get<IRequiredActor<WordCounterManager>>()
-            let parser = registry.Get<IRequiredActor<Parser>>()
+        fun (mailbox: Actor<DocumentMessages>) ->
+            let parser = registry.Get<Parser>()
+            let wordCounter = registry.Get<WordCounterManager>()
+
             let logger = mailbox.Context.GetLogger()            
             let rec loop =
                 function
@@ -78,7 +79,7 @@ module WordCountJobActor =
                                 )
                             mailbox.UnstashAll()
                             return! toScan
-                                    |> List.fold WordCountState.processDocument WordCountState.empty
+                                    |> List.fold WordCount.processDocument WordCount.empty
                                     |> Running
                                     |> loop 
                         | _ ->
@@ -92,13 +93,14 @@ module WordCountJobActor =
                             wordCounter.Forward(WordsFound (doc,found))
                             return! Running state |> loop  
                         | EndOfDocumentReached doc ->
-                            parser.Forward(EndOfDocumentReached doc)
+                            wordCounter.Forward(EndOfDocumentReached doc)
+                            return! Running state |> loop
                         | CountsTabulatedForDocument (doc, counts) ->
                             logger.Info("Counts tabulated for {0}", doc)                            
                             return! JobComplete(
                                 false,
-                                counts |> WordCountState.wordCount state doc
-                                |> WordCountState.completeDocument
+                                counts |> WordCount.wordCount state doc
+                                |> WordCount.completeDocument
                                 <| doc
                                 )|> loop
                         | DocumentScanFailed (doc, reason) ->
@@ -106,21 +108,23 @@ module WordCountJobActor =
                             return!
                                JobComplete (
                                     false,
-                                    WordCountState.failDocument state doc
+                                    WordCount.failDocument state doc
                                 )|> loop                        
-                        | _ -> failwith "todo"
+                        | SubscribeToAllCounts ->
+                            return! Running { state with subscribers = Set.add (mailbox.Sender()) state.subscribers } |> loop
+                        | _ -> return! Running state |> loop
                     }
                 | JobComplete (force, wordState) ->
-                    if force || (WordCountState.isCompleted wordState) then 
+                    if force || (WordCount.isCompleted wordState) then 
                         actor {
-                             do WordCountState.enumerateStatus wordState
+                             do WordCount.enumerateStatus wordState
                                 |> List.iter (
                                     fun (doc, status, count) ->
                                         logger.Info("Document {0} status: {1}, total words: {2}", doc, status, count)
                                     )
                              let mergedCounts = wordState.wordCount |> Map.values |> Counter.mergeMany
                              do CountsTabulatedForDocuments(Map.keys wordState.documentsToProcess |> List.ofSeq, mergedCounts)
-                                |> WordCountState.broadcast wordState
+                                |> WordCount.broadcast wordState
                              do mailbox.Context.Stop(mailbox.Self)
                              return ()
                         }

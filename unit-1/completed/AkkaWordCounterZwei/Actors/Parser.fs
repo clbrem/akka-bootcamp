@@ -11,25 +11,24 @@ open Akka.Actor
 open Akka.FSharp
 
 
-type Parser = FunActor<DocumentMessages, obj>
+type Parser = |Parser of  FunActor<DocumentMessages, obj>
 
 module Parser =
     
     open HtmlAgilityPack
     
     let private chunkSize = 20
-    let handleDocument (uri: AbsoluteUri, httpClientFactory: IHttpClientFactory, shutdownCts: CancellationTokenSource) =
-        task {
-            use requestToken = new CancellationTokenSource(delay=TimeSpan.FromSeconds(5.0))
-            use linkedToken = CancellationTokenSource.CreateLinkedTokenSource(requestToken.Token, shutdownCts.Token)
+    let handleDocument (uri: AbsoluteUri, httpClientFactory: IHttpClientFactory) =
+        task {            
             use client = httpClientFactory.CreateClient()
-            let! response = client.GetAsync(AbsoluteUri.value uri, linkedToken.Token)
-            let! content = response.Content.ReadAsStringAsync(linkedToken.Token)
+            let url = AbsoluteUri.value uri
+            let! response = client.GetAsync(url)
+            let! content = response.Content.ReadAsStringAsync()
             let doc = HtmlDocument()
             doc.LoadHtml(content)
-            // extract text
-            let text = TextExtractor.extractText doc 
-            return text |> Seq.collect (TextExtractor.extractTokens) |> Seq.chunkBySize chunkSize |> Seq.map List.ofArray
+            let text = TextExtractor.extractText doc
+            let tokens = text |> Seq.collect (TextExtractor.extractTokens) |> Seq.chunkBySize chunkSize |> Seq.map List.ofArray            
+            return tokens 
         }
     let doAThing =
         ActorTaskScheduler.RunTask(
@@ -37,8 +36,7 @@ module Parser =
             )
             
     let create (httpClientFactory: IHttpClientFactory) =
-        fun (mailbox: Actor<DocumentMessages>) ->
-            let shutdownCts = new CancellationTokenSource()
+        fun (mailbox: Actor<DocumentMessages>) ->            
             let logger = mailbox.Context.GetLogger()
             let rec loop () =                
                 actor {
@@ -50,7 +48,7 @@ module Parser =
                                     do logger.Debug("Processing Document {0}", document)
                                     let sender = mailbox.Sender()                                    
                                     try                                        
-                                        let! features = handleDocument(document, httpClientFactory, shutdownCts)
+                                        let! features = handleDocument(document, httpClientFactory)
                                         do features |> Seq.iter (fun f -> sender.Tell(WordsFound(document, f)))
                                         do sender.Tell (EndOfDocumentReached document)                                        
                                     with
@@ -59,7 +57,7 @@ module Parser =
                                         do sender.Tell (DocumentScanFailed (document, ex.Message))
                                 } :> Task
                             )                            
-                        return! loop()
-                    | _ -> return! loop()
+                        return! loop ()
+                    | _ -> return! loop ()
                 }
             loop ()
