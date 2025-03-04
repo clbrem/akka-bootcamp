@@ -5,7 +5,7 @@ module TextExtractor =
     open HtmlAgilityPack
     open System
     let private collector (input: string) =
-        if String.IsNullOrWhiteSpace(input) then [input] else []
+        if String.IsNullOrWhiteSpace(input) then [] else [input]
     let private justText (node:HtmlNode) =
         node.NodeType = HtmlNodeType.Text && not (node.ParentNode.Name = "script" || node.ParentNode.Name = "style")
     /// <summary>
