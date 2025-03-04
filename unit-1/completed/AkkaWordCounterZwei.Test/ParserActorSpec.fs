@@ -16,14 +16,17 @@ type ParserActorSpec(output: ITestOutputHelper) as this=
         task {
             let! parserActor = this.ActorRegistry.GetAsync<Parser>()
             let expectResultsProbe = this.CreateTestProbe()
-            parserActor.Tell (ScanDocument parserActorUri, expectResultsProbe)            
+            parserActor.Tell (ScanDocument parserActorUri, expectResultsProbe)
+            let! _ =
+                expectResultsProbe.ExpectMsgAsync<DocumentMessages>()
             let! _ =
                 expectResultsProbe.FishForMessageAsync
                     (
                       function
                       | EndOfDocumentReached _ -> true
                       | _ -> false
-                    )            
+                    )
+            
             return ()
         }
     

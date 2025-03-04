@@ -30,11 +30,7 @@ module Parser =
             let tokens = text |> Seq.collect (TextExtractor.extractTokens) |> Seq.chunkBySize chunkSize |> Seq.map List.ofArray            
             return tokens 
         }
-    let doAThing =
-        ActorTaskScheduler.RunTask(
-            fun () -> task {return ()} :> Task
-            )
-            
+
     let create (httpClientFactory: IHttpClientFactory) =
         fun (mailbox: Actor<DocumentMessages>) ->            
             let logger = mailbox.Context.GetLogger()
