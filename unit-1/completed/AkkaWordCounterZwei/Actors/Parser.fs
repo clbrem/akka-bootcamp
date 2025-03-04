@@ -1,11 +1,8 @@
 namespace AkkaWordCounterZwei.Actors
 open System.Net.Http
-open System
-open System.Threading
 open System.Threading.Tasks
 open Akka.Dispatch
 open AkkaWordCounterZwei
-open Akka
 open Akka.Event
 open Akka.Actor
 open Akka.FSharp
