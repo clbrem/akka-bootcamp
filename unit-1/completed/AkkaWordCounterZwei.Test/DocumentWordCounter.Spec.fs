@@ -7,7 +7,6 @@ open Akka.TestKit.Xunit2
 open Xunit.Abstractions
 
 
-
 type DocumentWordCounter_Spec(helper: ITestOutputHelper) as this=
     inherit TestKit(config="akka.loglevel=DEBUG",output=helper)
     let testDocumentUri = AbsoluteUri.ofString "https://example.com/test"
@@ -31,10 +30,3 @@ type DocumentWordCounter_Spec(helper: ITestOutputHelper) as this=
               Assert.Equal(6, Map.count m)
             | _ -> Assert.True(false)
         }
-    
-         
-        
-    
-    
-
-
