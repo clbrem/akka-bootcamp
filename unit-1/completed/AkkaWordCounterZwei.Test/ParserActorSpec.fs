@@ -18,7 +18,11 @@ type ParserActorSpec(output: ITestOutputHelper) as this=
             let expectResultsProbe = this.CreateTestProbe()
             parserActor.Tell (ScanDocument parserActorUri, expectResultsProbe)
             let! _ =
-                expectResultsProbe.ExpectMsgAsync<DocumentMessages>()
+                expectResultsProbe.FishForMessageAsync(
+                    function
+                      | WordsFound _ -> true
+                      | _ -> false
+                    )
             let! _ =
                 expectResultsProbe.FishForMessageAsync
                     (

@@ -1,5 +1,7 @@
 namespace AkkaWordCounterZwei.Actors
+open System
 open System.Net.Http
+open System.Threading
 open System.Threading.Tasks
 open Akka.Dispatch
 open AkkaWordCounterZwei
@@ -15,12 +17,14 @@ module Parser =
     open HtmlAgilityPack
     
     let private chunkSize = 20
-    let handleDocument (uri: AbsoluteUri, httpClientFactory: IHttpClientFactory) =
-        task {            
+    let handleDocument (uri: AbsoluteUri, httpClientFactory: IHttpClientFactory, cts: CancellationTokenSource) =
+        task {
+            use requestToken = new CancellationTokenSource(TimeSpan.FromSeconds(5.0))
+            use linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, requestToken.Token)
             use client = httpClientFactory.CreateClient()
             let url = AbsoluteUri.value uri
-            let! response = client.GetAsync(url)
-            let! content = response.Content.ReadAsStringAsync()
+            let! response = client.GetAsync(url, linkedToken.Token)
+            let! content = response.Content.ReadAsStringAsync(linkedToken.Token)
             let doc = HtmlDocument()
             doc.LoadHtml(content)
             let text = TextExtractor.extractText doc
@@ -30,6 +34,7 @@ module Parser =
 
     let create (httpClientFactory: IHttpClientFactory) =
         fun (mailbox: Actor<DocumentMessages>) ->            
+            let shutdownCts = new CancellationTokenSource();
             let logger = mailbox.Context.GetLogger()
             let rec loop () =                
                 actor {
@@ -41,7 +46,7 @@ module Parser =
                                     do logger.Debug("Processing Document {0}", document)
                                     let sender = mailbox.Sender()                                    
                                     try                                        
-                                        let! features = handleDocument(document, httpClientFactory)
+                                        let! features = handleDocument(document, httpClientFactory, shutdownCts)
                                         do features |> Seq.iter (fun f -> sender.Tell(WordsFound(document, f)))
                                         do sender.Tell (EndOfDocumentReached document)                                        
                                     with

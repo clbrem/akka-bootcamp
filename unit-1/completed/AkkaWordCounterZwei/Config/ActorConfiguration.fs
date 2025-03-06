@@ -41,7 +41,7 @@ module ActorConfiguration =
     let addStartup ( startupAction : ActorSystem -> IActorRegistry -> Task )(builder: AkkaConfigurationBuilder) =        
         builder.AddStartup(StartupTask startupAction)
         
-[<Extension>]
+
 type ActorConfigurationExtensions =
     [<Extension>]
     static member AddApplicationActors(builder: AkkaConfigurationBuilder) =
