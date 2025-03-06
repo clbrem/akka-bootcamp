@@ -5,8 +5,6 @@ open AkkaWordCounterZwei
 open Akka.FSharp
 
 type WordCounterManager = | WordCounterManager of FunActor<IWithDocumentId, obj>
-    
-        
 
 module WordCounterManager =
     let create =
@@ -16,7 +14,7 @@ module WordCounterManager =
                     match! mailbox.Receive() with
                     | msg when DocumentId.exists msg ->
                         let docId = DocumentId.get msg
-                        // what's all this then
+                        
                         let childName = $"word-counter-%s{HttpUtility.UrlEncode(docId.ToString())}"
                         let child = mailbox.Context.Child(childName)
                         if child.IsNobody() then

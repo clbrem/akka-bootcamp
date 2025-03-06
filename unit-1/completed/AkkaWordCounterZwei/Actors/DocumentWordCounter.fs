@@ -4,13 +4,14 @@ open Akka.Actor
 open Akka.Event
 open AkkaWordCounterZwei
 
+
 module DocumentWordCounter =
     type private WordCountStatus =
         | Receiving of Map<string, int> * Set<IActorRef>
         | Completed of Map<string, int>
     let create (documentId: AbsoluteUri)=
         fun (mailbox:Actor<DocumentMessages>) ->
-            mailbox.Context.OnTimeout(Timeout, timeout=System.TimeSpan.FromMinutes(2.0))
+            mailbox.Context.OnTimeout(Timeout, timeout=System.TimeSpan.FromMinutes(5.0))
             let logger = mailbox.Context.GetLogger()
             let rec loop =
                 function
@@ -72,8 +73,7 @@ module DocumentWordCounter =
                        | msg ->
                            mailbox.Unhandled(msg)
                            return! Receiving (wordCounts, subscribers) |> loop
-                   // So wait, is there really no way to handle ReceiveTimeout in the FSharp version?
-                   // Seems like an oversight!!
+
                    }
                    
             Receiving (Map.empty, Set.empty) |> loop 
