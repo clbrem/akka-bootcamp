@@ -1,8 +1,8 @@
-namespace AkkaWordCounterZwei.Actors
+namespace AkkaWordCounter2.App.FSharp.Actors
 open Akka.FSharp
 open Akka.Actor
 open Akka.Event
-open AkkaWordCounterZwei
+open AkkaWordCounter2.App.FSharp
 
 
 module DocumentWordCounter =

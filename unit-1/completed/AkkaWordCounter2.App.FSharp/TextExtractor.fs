@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei
+namespace AkkaWordCounter2.App.FSharp
 
 
 module TextExtractor =

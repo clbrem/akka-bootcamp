@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei
+namespace AkkaWordCounter2.App.FSharp
 
 open System
 
@@ -72,7 +72,7 @@ type DocumentMessages =
             | CountsTabulatedForDocuments (uris, _) -> None
             | ScanDocument uri -> Some uri
             | ScanDocuments _ -> None
-            | Timeout _ -> None
+            | Timeout  -> None
 
 
 

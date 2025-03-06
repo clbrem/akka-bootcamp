@@ -1,13 +1,13 @@
 ﻿open System
 open Akka.Actor
 open Akka.Hosting
-open AkkaWordCounterZwei
-open AkkaWordCounterZwei.Actors
+open AkkaWordCounter2.App.FSharp
+open AkkaWordCounter2.App.FSharp.Actors
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 
-open AkkaWordCounterZwei.Config
+open AkkaWordCounter2.App.FSharp.Config
 open Microsoft.Extensions.Options
 
 [<EntryPoint>]

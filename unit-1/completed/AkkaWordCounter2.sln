@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaWordCounter2.App", "Akk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkkaWordCounter2.App.Tests", "AkkaWordCounter2.App.Tests\AkkaWordCounter2.App.Tests.csproj", "{3714F9BF-EDCC-4114-90C5-B250B2CF7FC8}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounter", "AkkaWordCounter\AkkaWordCounter.fsproj", "{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounter.FSharp", "AkkaWordCounter.FSharp\AkkaWordCounter.FSharp.fsproj", "{648D7A1A-CB07-432B-9CAB-ED5CFE5F62EF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounterZwei", "AkkaWordCounterZwei\AkkaWordCounterZwei.fsproj", "{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounter2.App.FSharp", "AkkaWordCounter2.App.FSharp\AkkaWordCounter2.App.FSharp.fsproj", "{B19B8ED6-CDB7-4C66-9CC8-F9609DAB5775}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounterZwei.Test", "AkkaWordCounterZwei.Test\AkkaWordCounterZwei.Test.fsproj", "{DC8BFEB0-DEF3-4CC1-A746-A78D5CC4BD33}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AkkaWordCounter2.App.FSharp.Tests", "AkkaWordCounter2.App.FSharp.Tests\AkkaWordCounter2.App.FSharp.Tests.fsproj", "{DC8BFEB0-DEF3-4CC1-A746-A78D5CC4BD33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

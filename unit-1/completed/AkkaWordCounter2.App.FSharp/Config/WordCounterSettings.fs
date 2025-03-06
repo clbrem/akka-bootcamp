@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei.Config
+namespace AkkaWordCounter2.App.FSharp.Config
 open System
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Options

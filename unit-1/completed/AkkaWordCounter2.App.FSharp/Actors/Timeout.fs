@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei.Actors
+namespace AkkaWordCounter2.App.FSharp.Actors
 open System
 open System.Runtime.CompilerServices
 open System.Timers

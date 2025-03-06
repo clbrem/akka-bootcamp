@@ -4,10 +4,10 @@
         <TargetFramework>net9.0</TargetFramework>
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
+        <RootNamespace>AkkaWordCounterZwei.Test</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Tests.fs"/>
         <Compile Include="DocumentWordCounter.Spec.fs" />
         <Compile Include="Timeout.Spec.fs" />
         <Compile Include="ParserActorSpec.fs" />
@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AkkaWordCounterZwei\AkkaWordCounterZwei.fsproj" />
+      <ProjectReference Include="..\AkkaWordCounter2.App.FSharp\AkkaWordCounter2.App.FSharp.fsproj" />
     </ItemGroup>
 
 </Project>
