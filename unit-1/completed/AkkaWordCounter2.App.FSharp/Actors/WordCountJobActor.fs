@@ -1,7 +1,7 @@
-namespace AkkaWordCounterZwei.Actors
+namespace AkkaWordCounter2.App.FSharp.Actors
 open Akka.Event
 open Akka.Hosting
-open AkkaWordCounterZwei
+open AkkaWordCounter2.App.FSharp
 open Akka.FSharp
 open Akka.Actor
 

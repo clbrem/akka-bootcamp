@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei
+namespace AkkaWordCounter2.App.FSharp
 
 type Counter<'T when 'T : comparison> = Map<'T, int>
 

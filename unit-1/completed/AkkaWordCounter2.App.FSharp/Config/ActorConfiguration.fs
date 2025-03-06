@@ -1,4 +1,4 @@
-namespace AkkaWordCounterZwei.Config
+namespace AkkaWordCounter2.App.FSharp.Config
 open System.Net.Http
 open System.Runtime.CompilerServices
 open System.Threading.Tasks
@@ -6,7 +6,7 @@ open Akka.Actor
 open Akka.Hosting
 open Akka.Routing
 open Akka.FSharp
-open AkkaWordCounterZwei.Actors
+open AkkaWordCounter2.App.FSharp.Actors
 
 
 module ActorConfiguration =

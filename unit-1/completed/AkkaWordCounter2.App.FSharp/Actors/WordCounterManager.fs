@@ -1,7 +1,7 @@
-namespace AkkaWordCounterZwei.Actors
+namespace AkkaWordCounter2.App.FSharp.Actors
 open System.Web
 open Akka.Actor
-open AkkaWordCounterZwei
+open AkkaWordCounter2.App.FSharp
 open Akka.FSharp
 
 type WordCounterManager = | WordCounterManager of FunActor<IWithDocumentId, obj>

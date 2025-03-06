@@ -1,9 +1,8 @@
-namespace AkkaWordCounterZwei.Test
+namespace AkkaWordCounter2.App.FSharp
 open Akka.Hosting
-open AkkaWordCounterZwei
-open AkkaWordCounterZwei.Config.ActorConfiguration
+open AkkaWordCounter2.App.FSharp.Config.ActorConfiguration
 open Xunit
-open AkkaWordCounterZwei.Actors
+open AkkaWordCounter2.App.FSharp.Actors
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Xunit.Abstractions
