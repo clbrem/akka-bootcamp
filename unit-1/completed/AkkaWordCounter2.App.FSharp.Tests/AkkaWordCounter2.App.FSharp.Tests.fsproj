@@ -4,7 +4,6 @@
         <TargetFramework>net9.0</TargetFramework>
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
-        <RootNamespace>AkkaWordCounterZwei.Test</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
